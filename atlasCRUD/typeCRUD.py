@@ -36,6 +36,17 @@ def get_entity_type(entity_type):
     response = requests.get(endpoint, headers=headers, auth=(username, password))
     return response.json()
 
+def get_entity_types():
+    endpoint = f'{atlas_endpoint}/api/atlas/v2/types/typedefs'
+    response = requests.get(endpoint, auth=(username, password))
+
+    if response.status_code == 200:
+        data = response.json()
+        entity_types = [entity_def['name'] for entity_def in data['entityDefs']]
+        return entity_types
+    else:
+        return None
+
 # Actualizar un tipo de entidad.
 def update_entity_type(entity_type, super_types, attributes_defs):
     endpoint = f'{atlas_endpoint}/api/atlas/v2/types/typedef/name/{entity_type}'
@@ -59,7 +70,7 @@ def update_entity_type(entity_type, super_types, attributes_defs):
     return response.json()
 
 #Obtener atributos de una entidad
-def get_attributes(entity_type):
+def get_entity_attributes(entity_type):
     endpoint = f'{atlas_endpoint}/api/atlas/v2/types/typedefs'
     headers = {'Content-Type': 'application/json'}
 
@@ -72,7 +83,10 @@ def get_attributes(entity_type):
         for entity_def in entity_defs:
             if entity_def.get('name') == entity_type:
                 attribute_defs = entity_def.get('attributeDefs', [])
-                return attribute_defs
+                attribute_names = [attr_def.get('name') for attr_def in attribute_defs]
+                attribute_names.append('name')
+                attribute_names.append('qualifiedName')
+                return attribute_names
 
         print("No se encontró el tipo de entidad:", entity_type)
     else:
@@ -138,9 +152,12 @@ if __name__ == "__main__":
     #super_types = ["DataSet"]
     #attribute_defs = []
 
+    #entity_types = get_entity_types()
+    #print(entity_types)
+
     #Crear un nuevo tipo de entidad.
-    response = create_entity_type(entity_type, super_types, attribute_defs)
-    print("Tipo de entidad creada:", response)
+    #response = create_entity_type(entity_type, super_types, attribute_defs)
+    #print("Tipo de entidad creada:", response)
 
     # # Obtener el tipo de entidad recién creado.
     # entity_type_info = get_entity_type(entity_type)
@@ -154,5 +171,5 @@ if __name__ == "__main__":
     #delete_type_response = delete_entity_type(entity_type)
     #print("Tipo de entidad eliminado:", delete_type_response)
     
-    #attributes = get_attributes('Column')
-    #print(attributes)
+    attributes = get_entity_attributes('Table')
+    print(attributes)

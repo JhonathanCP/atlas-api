@@ -21,6 +21,61 @@ def create_entity(entity_type, entity_attributes):
     response = requests.post(endpoint, data=json.dumps(entity), headers=headers, auth=(username, password))
     return response.json()
 
+
+def get_attributes(entity__type):
+    endpoint2 = f'{atlas_endpoint}/api/atlas/v2/types/typedefs'
+    headers = {'Content-Type': 'application/json'}
+    response2 = requests.get(endpoint2, headers=headers, auth=(username, password))
+    if response2.status_code == 200:
+        response_json = response2.json()
+
+        entity_defs = response_json.get('entityDefs', [])
+        for entity_def in entity_defs:
+            if entity_def.get('name') == entity__type:
+                attribute_defs = entity_def.get('attributeDefs', [])
+                attribute_names = [attr_def.get('name') for attr_def in attribute_defs]
+                attribute_names.append('name')
+                attribute_names.append('qualifiedName')
+                return attribute_names
+
+def create_entity_APIONLY(entity_type, entity_attributes):
+
+    endpoint1 = f'{atlas_endpoint}/api/atlas/v2/entity'
+    headers = {'Content-Type': 'application/json'}
+    attribute_names = get_attributes(entity_type)
+
+    # Verificar que el número de atributos coincida
+    if len(entity_attributes) != len(attribute_names):
+        print("El número de atributos no coincide.")
+        return None
+
+    entity = {
+        'entity': {
+            'typeName': entity_type,
+            'attributes': {}
+        }
+    }
+
+    for i, attribute_value in enumerate(entity_attributes):
+        attribute_name = attribute_names[i]
+        entity['entity']['attributes'][attribute_name] = attribute_value
+
+    response = requests.post(endpoint1, data=json.dumps(entity), headers=headers, auth=(username, password))
+
+    if response.status_code == 200:
+        response_json = response.json()
+        created_entity_guid = response_json.get('guidAssignments', {}).get(entity_type)
+        if created_entity_guid:
+            print("Entidad creada con GUID:", created_entity_guid)
+            return created_entity_guid
+        else:
+            print("No se pudo obtener el GUID de la entidad creada.")
+            return None
+    else:
+        print("Error al crear la entidad.")
+        print("Código de error:", response.status_code)
+        return None
+    
 def create_entities(json_entities):
     endpoint = f'{atlas_endpoint}/api/atlas/v2/entity/bulk'
     headers = {'Content-Type': 'application/json'}
@@ -113,18 +168,13 @@ if __name__ == "__main__":
     #     print(entity)
     
     # Definir los detalles de la entidad a crear.
-    entity_type = "Column"
-    entity_attributes = {
-        'table_catalog': 'John Doe',
-        'age': 30,
-        'email': 'johndoe@example.com',
-        'qualifiedName': 'John Doe'
-    }
+    entity_type = "Table"
+    entity_attributes = ['testapi2','testapi2','testapi2','testapi2','testapi2','testapi2']
 
     # Crear una nueva entidad.
-    create_response = create_entity(entity_type, entity_attributes)
-    entity_guid = create_response['guid']
-    print("Entidad creada:", create_response)
+    #create_response = create_entity_APIONLY(entity_type, entity_attributes)
+    #entity_guid = create_response['guid']
+    #print("Entidad creada:", create_response)
 
     # # Obtener la entidad recién creada.
     # entity_info = get_entity(entity_guid)

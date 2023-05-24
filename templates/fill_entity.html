@@ -1,0 +1,15 @@
+<head>
+    <title>Crear una entidad</title>
+</head>
+<body>
+    <h1>Llene la información de la entidad</h1>
+    <form action="/save_entity" method="POST">        
+        {% for attribute in attributes %}
+            <label for="attribute">{{attribute}}</label>
+            <input type= "text" name="attr[]">
+        {% endfor %}
+        <br>
+        <input type="submit" value="Enviar">
+        </select>
+    </form>
+</body><h1></h1>

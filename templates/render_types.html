@@ -1,0 +1,16 @@
+<head>
+    <title>Crear una entidad</title>
+</head>
+<body>
+    <h1>Seleccione un tipo de entidad</h1>
+    <form action="/fill_entity" method="POST">
+        <label for="type">Tipo de entidad:</label>
+        <select name="type" id="type">
+            {% for type in types %}
+                <option value="{{ type }}">{{ type }}</option>
+            {% endfor %}
+            <br>
+        </select>
+        <input type="submit" value="Seleccionar">
+    </form>
+</body>
