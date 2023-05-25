@@ -21,33 +21,27 @@ def create_entity(entity_type, entity_attributes):
     response = requests.post(endpoint, data=json.dumps(entity), headers=headers, auth=(username, password))
     return response.json()
 
+def create_entity_APIONLY(entity_type, entity_attributes):
 
-def get_attributes(entity__type):
-    endpoint2 = f'{atlas_endpoint}/api/atlas/v2/types/typedefs'
+    endpoint1 = f'{atlas_endpoint}/api/atlas/v2/entity'
     headers = {'Content-Type': 'application/json'}
-    response2 = requests.get(endpoint2, headers=headers, auth=(username, password))
+    response2 = requests.get(f'{atlas_endpoint}/api/atlas/v2/types/typedefs', headers=headers, auth=(username, password))
     if response2.status_code == 200:
         response_json = response2.json()
 
         entity_defs = response_json.get('entityDefs', [])
         for entity_def in entity_defs:
-            if entity_def.get('name') == entity__type:
+            if entity_def.get('name') == entity_type:
                 attribute_defs = entity_def.get('attributeDefs', [])
                 attribute_names = [attr_def.get('name') for attr_def in attribute_defs]
                 attribute_names.append('name')
                 attribute_names.append('qualifiedName')
-                return attribute_names
-
-def create_entity_APIONLY(entity_type, entity_attributes):
-
-    endpoint1 = f'{atlas_endpoint}/api/atlas/v2/entity'
-    headers = {'Content-Type': 'application/json'}
-    attribute_names = get_attributes(entity_type)
+    print(attribute_names)
 
     # Verificar que el número de atributos coincida
-    if len(entity_attributes) != len(attribute_names):
-        print("El número de atributos no coincide.")
-        return None
+    # if len(entity_attributes) != len(attribute_names):
+    #     print("El número de atributos no coincide.")
+    #     return None
 
     entity = {
         'entity': {
@@ -157,6 +151,40 @@ def delete_entity(entity_guid):
     response = requests.delete(endpoint, headers=headers, auth=(username, password))
     return response.json()
 
+def delete_entity_by_name(entity_name):
+    # Buscar todas las entidades con el nombre especificado
+    search_endpoint = f'{atlas_endpoint}/api/atlas/v2/search/basic'
+    headers = {'Content-Type': 'application/json'}
+
+    query = {
+        'query': entity_name
+    }
+
+    search_response = requests.post(search_endpoint, json=query, headers=headers, auth=(username, password))
+    search_results = search_response.json()
+
+    entities_found = search_results.get('entities', [])
+    if len(entities_found) == 0:
+        print("No se encontró ninguna entidad con el nombre:", entity_name)
+        return None
+
+    # Eliminar cada entidad encontrada por su GUID
+    deleted_entities = []
+    for entity in entities_found:
+        entity_guid = entity['guid']
+        delete_endpoint = f'{atlas_endpoint}/api/atlas/v2/entity/guid/{entity_guid}'
+        delete_response = requests.delete(delete_endpoint, headers=headers, auth=(username, password))
+        if delete_response.status_code == 200:
+            deleted_entities.append(entity_guid)
+            print("Entidad eliminada:", entity_name)
+
+    if deleted_entities:
+        return deleted_entities
+    else:
+        print("Error al eliminar la entidad.")
+        print("Código de error:", delete_response.status_code)
+        return None
+
 # Ejemplo de uso:
 if __name__ == "__main__":
 
@@ -170,6 +198,11 @@ if __name__ == "__main__":
     # Definir los detalles de la entidad a crear.
     entity_type = "Table"
     entity_attributes = ['testapi2','testapi2','testapi2','testapi2','testapi2','testapi2']
+
+    #entities = get_entities_by_name('testapi')
+    #print(entities)
+
+    #delete_entity_by_name('testapi')
 
     # Crear una nueva entidad.
     #create_response = create_entity_APIONLY(entity_type, entity_attributes)

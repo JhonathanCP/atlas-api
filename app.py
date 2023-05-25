@@ -5,10 +5,10 @@ from flask import redirect, url_for
 
 app = Flask(__name__, template_folder='./templates')
 
-# Ruta principal
-# @app.route('/')
-# def index():
-#     return render_template('index.html')
+#Ruta principal
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/render_types')
 def render_types():
@@ -17,17 +17,16 @@ def render_types():
 
 @app.route('/fill_entity', methods=['GET', 'POST'])
 def fill_entity():
-    opcion_seleccionada = request.form['type']
-    attributes = get_entity_attributes(opcion_seleccionada)
-    return render_template('fill_entity.html', attributes=attributes)
+    type = request.form['type']
+    attributes = get_entity_attributes(type)
+    return render_template('fill_entity.html', attributes=attributes, type=type)
 
 @app.route('/save_entity', methods=['POST'])
 def save_entity():
     filled_attributes = request.form.getlist('attr[]')
-    print(filled_attributes)
-    type = 'Tabla'
+    type = request.form['type']
     create_entity_APIONLY(type, filled_attributes)
-    return 'Creado'
+    return render_template('')
 
 # @app.route('/entity/read', methods=['GET', 'POST'])
 # def read_entity_form():
@@ -61,18 +60,17 @@ def save_entity():
 
 #     return render_template('entity_update_form.html')
 
-# @app.route('/entity/delete', methods=['GET', 'POST'])
-# def delete_entity_form():
-#     if request.method == 'POST':
-#         entity_type = request.form['entity_type']
-#         entity_id = request.form['entity_id']
+@app.route('/entity/delete', methods=['GET', 'POST'])
+def delete_entity_form():
+    if request.method == 'POST':
+        entity_name = request.form['entity_type']
 
-#         # Eliminar la entidad
-#         delete_entity(entity_type, entity_id)
+        # Eliminar la entidad
+        delete_entity_by_name(entity_name)
 
-#         return redirect(url_for('index'))
-
-#     return render_template('entity_delete_form.html')
+        return 'Entidad eliminada correctamente'
+    
+    return render_template('entity_delete_form.html')
 
 # # Rutas para CRUD de tipos de entidad
 # @app.route('/type/create', methods=['GET', 'POST'])

@@ -3,13 +3,13 @@
 </head>
 <body>
     <h1>Llene la información de la entidad</h1>
-    <form action="/save_entity" method="POST">        
+    <form action="/save_entity" method="POST">
+        <input type="hidden" name="type" value="{{ type }}">
         {% for attribute in attributes %}
             <label for="attribute">{{attribute}}</label>
-            <input type= "text" name="attr[]">
+            <input type="text" name="attr[]" id="attribute">
+            <br>
         {% endfor %}
-        <br>
         <input type="submit" value="Enviar">
-        </select>
     </form>
-</body><h1></h1>
+</body>

@@ -1,0 +1,18 @@
+<!-- entity_delete_form.html -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Eliminar entidad</title>
+    </head>
+    <body>
+        <h1>Eliminar entidad</h1>
+
+        <form method="POST" action="{{ url_for('delete_entity_form') }}">
+            <label for="entity_type">Nombre de la entidad a eliminar:</label>
+            <input type="text" name="entity_type" id="entity_type" required>
+
+            <input type="submit" value="Eliminar">
+        </form>
+    </body>
+</html>
