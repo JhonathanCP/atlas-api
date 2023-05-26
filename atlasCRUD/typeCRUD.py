@@ -28,6 +28,21 @@ def create_entity_type(entity_type, super_types, attribute_defs):
     response = requests.post(endpoint, json=typedef, headers=headers, auth=(username, password))
     return response.json()
 
+def get_entity_type_definition(entity_type):
+    endpoint = f'{atlas_endpoint}/api/atlas/v2/types/typedefs'
+    headers = {'Content-Type': 'application/json'}
+
+    response = requests.get(endpoint, headers=headers, auth=(username, password))
+    response.raise_for_status()
+    response_json = response.json()
+
+    entity_defs = response_json.get('entityDefs', [])
+    for entity_def in entity_defs:
+        if entity_def.get('name') == entity_type:
+            return entity_def
+
+    return None
+
 # Obtener un tipo de entidad por nombre.
 def get_entity_type(entity_type):
     endpoint = f'{atlas_endpoint}/api/atlas/v2/types/typedef/name/{entity_type}'
@@ -68,6 +83,16 @@ def update_entity_type(entity_type, super_types, attributes_defs):
 
     response = requests.put(endpoint, json=typedef, headers=headers, auth=(username, password))
     return response.json()
+
+def update_entity_type_definition(entity_type, entity_definition):
+    endpoint = f'{atlas_endpoint}/api/atlas/v2/types/typedefs'
+    headers = {'Content-Type': 'application/json'}
+
+    response = requests.put(endpoint, json=entity_definition, headers=headers, auth=(username, password))
+    response.raise_for_status()
+
+    print(f"Se ha actualizado la definición del tipo de entidad '{entity_type}' correctamente.")
+
 
 #Obtener atributos de una entidad
 def get_entity_attributes(entity_type):
@@ -171,5 +196,18 @@ if __name__ == "__main__":
     #delete_type_response = delete_entity_type(entity_type)
     #print("Tipo de entidad eliminado:", delete_type_response)
     
-    attributes = get_entity_attributes('Table')
-    print(attributes)
+    #attributes = get_entity_attributes('Table')
+    #print(attributes)
+
+    entity_type = 'spark_column'
+
+    delete_entity_type(entity_type)
+
+    #type = delete_entity_type('spark_column')
+    #print(type)
+    #types = get_entity_types()
+    #print(types)
+    # for type in types:
+    #     if type != 'DataSet':
+    #         if type!= 'Table':
+    #             print(type)
