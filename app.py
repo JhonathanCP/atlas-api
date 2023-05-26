@@ -26,7 +26,7 @@ def save_entity():
     filled_attributes = request.form.getlist('attr[]')
     type = request.form['type']
     create_entity_APIONLY(type, filled_attributes)
-    return render_template('')
+    return render_template('/save_entity')
 
 # @app.route('/entity/read', methods=['GET', 'POST'])
 # def read_entity_form():
